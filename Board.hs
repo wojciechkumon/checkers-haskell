@@ -75,6 +75,9 @@ isEmptyField board position = Nothing == getField board position
 updateBoard :: Board -> Field -> Position -> Board
 updateBoard = updateMatrix
 
+--doNextMove :: Board -> Position -> Position -> Board 
+--doNextMove board posFrom posTo = updateBoard (updateBoard board Nothing posFrom) 
+
 deletePiece :: Board -> Position -> Board
 deletePiece board position = updateBoard board emptyField position
 
