@@ -15,6 +15,15 @@ type NextMove = (Position, [Position])
 --  Nothing -> [] 
 --  Just piece -> map (flip (movePiece pos) board) $ genPieceMoves board pos piece 
 
+
+-- generates board after move, move must be correct
+doNextMove :: Board -> Position -> Position -> Board 
+doNextMove board posFrom posTo = movePiece posFrom posTo (deleteCaptures board (getNextMove board posFrom posTo))
+
+deleteCaptures :: Board -> NextMove -> Board
+deleteCaptures board (_, []) = board
+deleteCaptures board (pos, head:captures) = deleteCaptures (deletePiece board head) (pos, captures) 
+
 -- checks if move is possible for piece
 isMovePossible :: Board -> Position -> Position -> Bool
 isMovePossible board posFrom posTo = (filter (\(pos, _) -> pos == posTo) (genMoves board posFrom)) /= []

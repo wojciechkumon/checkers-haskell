@@ -54,8 +54,8 @@ readBoard :: String -> Board
 readBoard inputString =  map (map readField) (lines inputString)
 
 -- format: "a1" - "h8"
-readPosition :: String -> Position
-readPosition [x, y] = (7 - ((ord y) - (ord '1')), (ord x) - (ord 'a'))
+readPosition :: Int -> Position
+readPosition val = ((val - 1) `quot` 4, if (((val-1)`quot`4) `mod` 2 == 0) then 1+2*((val-1) `mod` 4) else 2*((val-1) `mod` 4))
 
 -- FUNCTIONS -- 
 
@@ -75,16 +75,13 @@ isEmptyField board position = Nothing == getField board position
 updateBoard :: Board -> Field -> Position -> Board
 updateBoard = updateMatrix
 
---doNextMove :: Board -> Position -> Position -> Board 
---doNextMove board posFrom posTo = updateBoard (updateBoard board Nothing posFrom) 
-
 deletePiece :: Board -> Position -> Board
 deletePiece board position = updateBoard board emptyField position
 
 movePiece :: Position -> Position -> Board -> Board
 movePiece pos1 pos2 board = updateBoard (deletePiece board pos1) (getField board pos1) pos2
 
-move :: String -> String -> Board -> Board
+move :: Int -> Int -> Board -> Board
 move pos1 pos2 = movePiece (readPosition pos1) (readPosition pos2)
 
 isPositionOutside :: Position -> Bool
