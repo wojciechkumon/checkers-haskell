@@ -16,19 +16,13 @@ getPieceValue (Piece King _) _ =  25
 -- aggregated values for two players Board -> (pointsWhite, pointsBlack)
 analyzeBoard :: Board -> (Int,Int) -- (0,0,0) == (pointsWhite, pointsBlack,currentRow)
 analyzeBoard board = takePairFromThree $ foldl (\(pw,pb,rowIndex) row -> addPairAndNextRow (pw,pb,rowIndex) (analyzeRow row rowIndex)) (0,0,0) board 
+  where takePairFromThree (first,second,third) = (first,second)
+        addPairAndNextRow (pw,pb,rowIndex) (pw2,pb2) = (pw+pw2,pb+pb2,rowIndex+1)
 
-takePairFromThree :: (a,a,a) -> (a,a)
-takePairFromThree (first,second,third) = (first,second)
-
-addPairAndNextRow :: (Int,Int,Int) -> (Int,Int) -> (Int,Int,Int)
-addPairAndNextRow (pw,pb,rowIndex) (pw2,pb2) = (pw+pw2,pb+pb2,rowIndex+1)
 
 -- row -> rowIndex -> (pointsWhite, pointsBlack)
 analyzeRow :: [Field] -> Int -> (Int, Int)
 analyzeRow row rowIndex = foldl (addValue rowIndex) (0,0) row
-
--- rowIndex -> points -> field -> newPoints
-addValue :: Int -> (Int, Int) -> Field -> (Int, Int)
-addValue _ points Nothing = points
-addValue rowIndex (pointsWhite,pointsBlack) (Just (Piece pieceType Black)) = (pointsWhite, pointsBlack + getPieceValue (Piece pieceType Black) rowIndex)
-addValue rowIndex (pointsWhite,pointsBlack) (Just (Piece pieceType White)) =  (pointsWhite + getPieceValue (Piece pieceType White) rowIndex, pointsBlack)
+  where addValue _ points Nothing = points -- rowIndex -> points -> field -> newPoints
+        addValue rowIndex (pointsWhite,pointsBlack) (Just (Piece pieceType Black)) = (pointsWhite, pointsBlack + getPieceValue (Piece pieceType Black) rowIndex)
+        addValue rowIndex (pointsWhite,pointsBlack) (Just (Piece pieceType White)) =  (pointsWhite + getPieceValue (Piece pieceType White) rowIndex, pointsBlack)

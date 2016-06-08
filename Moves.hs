@@ -22,7 +22,7 @@ doNextMove board posFrom posTo = movePiece posFrom posTo (deleteCaptures board (
 
 deleteCaptures :: Board -> NextMove -> Board
 deleteCaptures board (_, []) = board
-deleteCaptures board (pos, head:captures) = deleteCaptures (deletePiece board head) (pos, captures) 
+deleteCaptures board (pos, (head:captures)) = deleteCaptures (deletePiece board head) (pos, captures) 
 
 -- checks if move is possible for piece
 isMovePossible :: Board -> Position -> Position -> Bool
@@ -118,3 +118,7 @@ iterateDirection n pos board color position | isPositionOutside aimsAt = []
 
 --nextStates :: State -> [State]
 --nextStates (pieceColor, board) = [(getOppositeColor pieceColor, board')|pos<-getColorPositions pieceColor board, board'<-genMoveBoards board pos]
+
+
+getNextStates :: State -> [State]
+getNextStates (color,board) = []
