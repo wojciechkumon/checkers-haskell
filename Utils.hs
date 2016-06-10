@@ -11,7 +11,7 @@ applyAll a [] = a
 applyAll a (fun:xs) = applyAll (fun a) xs
 
 updateMatrix :: [[a]] -> a -> (Int, Int) -> [[a]]
-updateMatrix matrix element (i, j) = updateList matrix i (\z -> updateList z j (const element))
+updateMatrix matrix element (i, j) = updateList matrix i (\row -> updateList row j (const element))
 
 updateList :: [a] -> Int -> (a -> a) -> [a]
 updateList [] _ _ = []

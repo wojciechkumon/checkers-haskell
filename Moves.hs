@@ -2,18 +2,25 @@ module Moves where
 import Board
 import Utils
 
+
 -- PieceColor to decide whose turn it is
 type GameState = (PieceColor, Board)
 type NextMove = ([Position], [Position])
-data Move = Move (Position, Position) | Kill [Position]
+data Move = Move (Position, Position) | Kill [Position] deriving Show
 
 
 -- generates board after move, move must be correct
 doNextMove :: Board -> Move -> Board 
-doNextMove board (Move (oldPos,newPos)) = movePiece oldPos newPos board
-doNextMove board (Kill [oldPos,newPos]) = movePiece oldPos newPos (deletePiecesOnLine oldPos newPos board)
+doNextMove board (Move (oldPos,newPos)) = switchToKingIfPossible newPos $ movePiece oldPos newPos board
+doNextMove board (Kill [oldPos,newPos]) =  switchToKingIfPossible newPos $ movePiece oldPos newPos (deletePiecesOnLine oldPos newPos board)
 doNextMove board (Kill (oldPos:newerPos:nextPoses)) = doNextMove (movePiece oldPos newerPos (deletePiecesOnLine oldPos newerPos board)) (Kill (newerPos:nextPoses))
 
+switchToKingIfPossible :: Position -> Board -> Board
+switchToKingIfPossible (x,y) board | (x == 7) && (getField board (x,y) == (Just (Piece Man Black))) = updateBoard board (Just (Piece King Black)) (x,y)
+                                   | (x == 0) && (getField board (x,y) == (Just (Piece Man White))) = updateBoard board (Just (Piece King White)) (x,y)
+                                   | otherwise = board
+
+-- deletes everything between positions
 deletePiecesOnLine :: Position -> Position -> Board -> Board
 deletePiecesOnLine (oldX,oldY) (newX,newY) board | ((oldX == newX) && (oldY == newY)) = board
                                                  | otherwise = deletePiecesOnLine (getNextPositionOnLine (oldX,oldY) (newX,newY)) (newX,newY) (deletePiece board (getNextPositionOnLine (oldX,oldY) (newX,newY)))
@@ -21,57 +28,64 @@ deletePiecesOnLine (oldX,oldY) (newX,newY) board | ((oldX == newX) && (oldY == n
 getNextPositionOnLine :: Position -> Position -> Position
 getNextPositionOnLine (oldX,oldY) (newX,newY) = (oldX+(oneIfGreaterElseMinusOne newX oldX),oldY+(oneIfGreaterElseMinusOne newY oldY))
 
-deleteCaptures :: Board -> NextMove -> Board
-deleteCaptures board (_, []) = board
-deleteCaptures board (pos, (head:captures)) = deleteCaptures (deletePiece board head) (pos, captures) 
 
--- checks if move is possible for piece
-isMovePossible :: Board -> Position -> Position -> Bool
-isMovePossible board posFrom posTo = (filter (\([pos], _) -> pos == posTo) (genMoves board posFrom)) /= []
+generatePossibleMoves :: Board -> Position -> [Move]
+generatePossibleMoves board pos = generateMovesForField board pos (getField board pos)
 
-getNextMove :: Board -> Position -> Position -> NextMove
-getNextMove board posFrom posTo = head (filter (\([pos], _) -> pos == posTo) (genMoves board posFrom))
+generateMovesForField :: Board -> Position -> Field -> [Move]
+generateMovesForField _ _ Nothing = []
+generateMovesForField board pos (Just (Piece pieceType color)) = 
+  if (not (null (generateCaptures board pos (Piece pieceType color)))) then 
+       generateCaptures board pos (Piece pieceType color) 
+  else generateNormalMoves board pos (Piece pieceType color)
 
--- moves generator, generates all possible moves for position
-genMoves :: Board -> Position -> [NextMove]
-genMoves board pos = case getField board pos of
-  Nothing -> [] 
-  Just piece -> genPieceMoves board pos piece
 
-genPieceMoves :: Board -> Position -> Piece -> [NextMove]
---genPieceMoves board pos (Piece King color) = concatMap (iterateDirection 1 pos board color) (getPossibleMoves King)
---genPieceMoves board pos (Piece Man color) = 
-  --[coord|v <- toNextMoves (map (multPair (getDirection color)) (getPossibleMoves Man)), let coord = addPair pos v, isOppositeColor board color coord]
-genPieceMoves board pos (Piece pieceType color) = 
-  if (isCapturePossible board pos color) then 
-    getCaptures board pos (Piece pieceType color) else 
-    toNextMoves $ filter (\position -> isFieldEmpty board position) $ 
-    map (\possibleMove -> addPair (pos) (multPair (getDirection color) possibleMove)) (getPossibleMoves pieceType)
+generateCaptures :: Board -> Position -> Piece -> [Move]
+generateCaptures board pos (Piece Man color) = 
+  removeNotLongestKillChains $ addRecursiveKills board (Piece Man color) $ 
+  map (\position -> Kill [pos,position]) $ 
+  filter (isFieldEmpty board) $ map (jumpOver pos) $ 
+  filter (\position -> isOppositePiece board color position) $ 
+  map (addPair pos) diagonal
+generateCaptures board pos (Piece King color) = [] -- TODO
 
--- checks if any capture is possible for position, PieceColor = color of piece
-isCapturePossible :: Board -> Position -> PieceColor -> Bool
-isCapturePossible board pos color = 
-  filter (isFieldEmpty board) (map (jumpOver pos) (filter (\position -> isOppositePiece board color position) (map (addPair pos) diagonal))) /= []
+removeNotLongestKillChains :: [Move] -> [Move]
+removeNotLongestKillChains moves = filter (\(Kill killsList) -> length killsList == maxKillMoves moves) moves
 
-getCaptures :: Board -> Position -> Piece -> [NextMove]
-getCaptures board pos (Piece pieceType pieceColor) =
-  filter (\([newPos], [_]) -> isFieldEmpty board newPos) 
-  (map (\capturedPosition -> ([jumpOver pos capturedPosition], [capturedPosition])) 
-  (filter (\position -> isOppositePiece board pieceColor position) 
-  (map (addPair pos) diagonal)))
+maxKillMoves :: [Move] -> Int
+maxKillMoves killMoves = maximum $ map (\(Kill killsList) -> length killsList) killMoves
 
-addCaptures :: [NextMove] -> [NextMove]
-addCaptures [] = []
-addCaptures nextMoves = nextMoves
+addRecursiveKills :: Board -> Piece -> [Move] -> [Move]
+addRecursiveKills board (Piece Man color) moves = foldl (++) [] $ map (convertToNextKill board (Piece Man color)) moves
+addRecursiveKills board (Piece King color) moves = [] -- TODO
 
-toNextMoves :: [Position] -> [NextMove]
-toNextMoves [] = []
-toNextMoves positions = map (\pos -> ([pos], [])) positions
+convertToNextKill :: Board -> Piece -> Move -> [Move]
+convertToNextKill oldBoard piece (Kill killMoves) = 
+  if not (null (generateCaptures (doNextMove oldBoard (Kill killMoves)) (last killMoves) piece)) then
+       map (addNextKill (Kill killMoves)) $ generateCaptures (doNextMove oldBoard (Kill killMoves)) (last killMoves) piece
+  else [Kill killMoves]
+
+addNextKill :: Move -> Move -> Move
+addNextKill (Kill currentKillMoves) (Kill (killHead:killTail)) = Kill (currentKillMoves++killTail)
+
+
+generateNormalMoves :: Board -> Position -> Piece -> [Move]
+generateNormalMoves board pos (Piece Man color) = 
+  map (\position -> Move (pos, position)) $
+  filter (\position -> isFieldEmpty board position) $ 
+  map (\possibleMove -> addPair pos (multPair (getDirection color) possibleMove)) (getMovesDirections Man)
+generateNormalMoves board pos (Piece King color) = [] -- TODO
+
+
+-- TODO wszystkie mozliwe ruchy dla gracza
+--generatePossiblePlayerMoves :: Board -> PieceColor -> [Move]
+--generatePossiblePlayerMoves board color = 
+
 
 -- general possible moves for pieces
-getPossibleMoves :: PieceType -> [Position]
-getPossibleMoves Man = forwardDiagonal
-getPossibleMoves King = diagonal
+getMovesDirections :: PieceType -> [Position]
+getMovesDirections Man = forwardDiagonal
+getMovesDirections King = diagonal
 
 -- diagonal moves for King and captures
 diagonal :: [Position]
@@ -92,12 +106,6 @@ jumpOver (a,b) (c,d) = if ((c - a) > 0) then
   (if ((d-b) > 0) then (c+1, d+1) else (c+1, d-1))
   else (if ((d-b) > 0) then (c-1, d+1) else (c-1, d-1))
 
-
-concatWithNewLines :: String -> String -> String
-concatWithNewLines first second = first ++ "\n\n" ++ second
-
---showAllPossibleMovesFor :: Board -> Position -> String
---showAllPossibleMovesFor board pos = foldl concatWithNewLines "" (map showBoard (genMoveBoards board pos))
 
 isOppositeColor :: Board -> PieceColor -> Position -> Bool
 isOppositeColor board color pos = isPositionInside pos && not (hasFieldColor color (getField board pos))

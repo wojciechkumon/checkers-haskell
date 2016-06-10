@@ -24,7 +24,7 @@ boardAfterFirstMove = readBoard boardStringAfterFirstMove
 boardsAfterFirstMoveList :: [Board]
 boardsAfterFirstMoveList = [startingBoard, boardAfterFirstMove]
 
-testBoardString = "........\n..B...b.\n........\n......b.\n........\n......b.\n.....w..\n........"
+testBoardString = "........\n..B...b.\n........\n..b...b.\n........\n....b.b.\n.....w..\n........"
 testBoard = readBoard testBoardString
 
 fld1 = Just (Piece King Black)
@@ -32,3 +32,4 @@ fld2 = Just (Piece Man White)
 fld3 = Nothing
 fld4 = Just (Piece Man Black)
 piece1 = (read "B") :: Piece
+-- example: putStr $ showBoard $ doNextMove testBoard $ head $ generatePossibleMoves testBoard (6,5)
