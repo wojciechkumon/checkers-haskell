@@ -1,4 +1,7 @@
 module Parser where
+import Board
+import Moves
+import Game
 import System.Environment
 import Control.Monad.Trans.State.Lazy
 import Text.ParserCombinators.Parsec
@@ -13,8 +16,8 @@ import Control.Monad.IO.Class
 -- ruch Int-Int
 -- bicie [Intx]Int
 
-data PDN =   Move (Int,Int) -- pozycja startowa i koncowa
-           | Kill [Int]  -- pozycja startowa to glowa, pozniej kolejne pozycje
+data PDN =   MovePDN (Int,Int) -- pozycja startowa i koncowa
+           | KillPDN [Int]     -- pozycja startowa to glowa, pozniej kolejne pozycje
            deriving (Show,Eq)
 
 -- instance Show PDN where
@@ -36,40 +39,46 @@ parseMove = do
             (char '-')
             x2 <- parsePos
             eof
-            return $ Move (x1,x2)
+            return $ MovePDN (x1,x2)
 
 parseKill = do
             x1 <- sepBy (parsePos) (char 'x')
             eof
             if (length x1) > 1 then
-              return $ Kill x1
+              return $ KillPDN x1
             else
               unexpected "start i koniec minimum"
 
 parsePDN =  try parseMove <|> parseKill
 
-type Game a = IO a
 
-play :: String -> Game ()
-play i = do
-  case parse parsePDN "sPDN err" i of
-    Right move -> (hPutStrLn stderr $ "ruch = " ++ (show move))
+type GameIO a = IO a
+
+play :: String -> GameIO ()
+play line = do
+  case parse parsePDN "sPDN err" line of
+    Right move -> do
+                    hPutStrLn stderr $ "ruch = " ++ (show move)
     Left x -> fail $ show x
   putStrLn "11-15" >> hFlush stdout -- konkretny ruch trzeba wygenerowac
 
-
-doPlay :: Game ()
+doPlay :: GameIO ()
 doPlay = getContents >>= (mapM_ play) . lines
 
+--doPlay state = iterateUntilEnd (play  ) state
+                              
 
-main :: IO ()
-main = do
-  args <- getArgs
-  progName <- getProgName
-  mapM_ putStrLn args
-  putStrLn progName
-  let args = ["w"] -- do zakomentowania w programmie
-  case (listToMaybe args) of
-    Just "b" -> doPlay
-    Just "w" -> putStrLn "11-15" >> hFlush stdout >> doPlay -- biaĹe wykonujÄ pierwszy ruch
-    Nothing -> doPlay
+--iterate (nextMove playerColor) (White, startingBoard)
+nextMove :: PieceColor -> GameState -> GameState
+nextMove playerColor (stateColor, board) | (playerColor == stateColor) = nextPlayerMove (stateColor, board)
+                                         | otherwise = nextComputerMove (stateColor, board)
+-- TODO
+nextPlayerMove :: GameState -> GameState
+nextPlayerMove (color, board) = (color, board) 
+
+nextComputerMove :: GameState -> GameState
+nextComputerMove state = state--case (generateGameTree maxTreeDepth state) of
+--                           GameTree newState [] -> newState
+--                           GameTree (color,_) children -> 
+
+

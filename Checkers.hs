@@ -1,24 +1,28 @@
-module Checkers where
 import Board
 import Moves
 import Utils
 import Game
 import Evaluator
 import Minimax
+import Parser
+import System.IO
+import System.Environment
+import Data.Maybe
 
-startGameAs :: PieceColor -> IO ()
-startGameAs playerColor = putStrLn $ concatMap (("\n"++) . showBoard . snd) $ take 100 $ iterateUntilEnd (nextMove playerColor) (White, startingBoard)
+--startGameAs :: PieceColor -> IO ()
+--startGameAs playerColor = putStrLn $ concatMap (("\n"++) . showBoard . snd) $ take 100 $ iterateUntilEnd (nextMove playerColor) (White, startingBoard)
 
 
-nextMove :: PieceColor -> State -> State
-nextMove playerColor (stateColor, board) | (playerColor == stateColor) = nextPlayerMove (stateColor, board)
-                                         | otherwise = nextComputerMove (stateColor, board)
 
--- TODO
-nextPlayerMove :: State -> State
-nextPlayerMove (color, board) = (color, board) 
 
-nextComputerMove :: State -> State
-nextComputerMove state = case (generateGameTree maxTreeDepth state) of
-                           GameTree newState [] -> newState
-                           GameTree (color,_) children -> 
+main :: IO ()
+main = do
+  args <- getArgs
+  progName <- getProgName
+  mapM_ putStrLn args
+  putStrLn progName
+  let args = ["w"] -- do zakomentowania w programmie
+  case (listToMaybe args) of
+    Just "b" -> doPlay
+    Just "w" -> putStrLn "22-18" >> hFlush stdout >> doPlay -- białe wykonują pierwszy ruch
+    Nothing -> doPlay

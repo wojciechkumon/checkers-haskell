@@ -4,21 +4,21 @@ import Board
 import Evaluator
 import Moves
 
-data GameTree = GameTree {state :: State, gameTrees :: [GameTree]}
+data GameTree = GameTree {state :: GameState, gameTrees :: [GameTree]}
 
 maxTreeDepth :: Int
 maxTreeDepth = 3
 
-generateGameTree :: Int -> State -> GameTree
+generateGameTree :: Int -> GameState -> GameTree
 generateGameTree 0 state = GameTree state []
 generateGameTree depth state | isLastState state = GameTree state []
                              | otherwise = GameTree state (map (generateGameTree (depth-1)) (getNextStates state))
 
-evaluateState :: State -> Int
+evaluateState :: GameState -> Int
 evaluateState = evaluateBoard . snd
 
 -- checks end of the game, TODO check if all blocked
-isLastState :: State -> Bool
+isLastState :: GameState -> Bool
 isLastState state = (whitePoints == 0) || (blackPoints == 0)
   where (whitePoints, blackPoints) = analyzeBoard (snd state)
 

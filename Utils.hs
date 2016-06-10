@@ -17,3 +17,6 @@ updateList :: [a] -> Int -> (a -> a) -> [a]
 updateList [] _ _ = []
 updateList (x:xs) 0 fun = (fun x):xs
 updateList (x:xs) n fun = x:updateList xs (n-1) fun
+
+oneIfGreaterElseMinusOne :: Int -> Int -> Int
+oneIfGreaterElseMinusOne first second = if (first > second) then 1 else -1

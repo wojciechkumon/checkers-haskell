@@ -3,25 +3,23 @@ import Board
 import Utils
 
 -- PieceColor to decide whose turn it is
-type State = (PieceColor, Board)
-
--- (listOfnewPositions, listOfCapturedOpponetsPiecesPostions)
+type GameState = (PieceColor, Board)
 type NextMove = ([Position], [Position])
-
-readNextMove :: String -> NextMove
-readNextMove str | length $ splitOn "-" str == 2) = 
-
-
--- moves generator, generates all possible boards for position
---genMoveBoards :: Board -> Position -> [Board]
---genMoveBoards board pos = case getField board pos of
---  Nothing -> [] 
---  Just piece -> map (flip (movePiece pos) board) $ genPieceMoves board pos piece 
+data Move = Move (Position, Position) | Kill [Position]
 
 
 -- generates board after move, move must be correct
-doNextMove :: Board -> Position -> Position -> Board 
-doNextMove board posFrom posTo = movePiece posFrom posTo (deleteCaptures board (getNextMove board posFrom posTo))
+doNextMove :: Board -> Move -> Board 
+doNextMove board (Move (oldPos,newPos)) = movePiece oldPos newPos board
+doNextMove board (Kill [oldPos,newPos]) = movePiece oldPos newPos (deletePiecesOnLine oldPos newPos board)
+doNextMove board (Kill (oldPos:newerPos:nextPoses)) = doNextMove (movePiece oldPos newerPos (deletePiecesOnLine oldPos newerPos board)) (Kill (newerPos:nextPoses))
+
+deletePiecesOnLine :: Position -> Position -> Board -> Board
+deletePiecesOnLine (oldX,oldY) (newX,newY) board | ((oldX == newX) && (oldY == newY)) = board
+                                                 | otherwise = deletePiecesOnLine (getNextPositionOnLine (oldX,oldY) (newX,newY)) (newX,newY) (deletePiece board (getNextPositionOnLine (oldX,oldY) (newX,newY)))
+
+getNextPositionOnLine :: Position -> Position -> Position
+getNextPositionOnLine (oldX,oldY) (newX,newY) = (oldX+(oneIfGreaterElseMinusOne newX oldX),oldY+(oneIfGreaterElseMinusOne newY oldY))
 
 deleteCaptures :: Board -> NextMove -> Board
 deleteCaptures board (_, []) = board
@@ -119,12 +117,13 @@ iterateDirection n pos board color position | isPositionOutside aimsAt = []
                                              Just (Piece _ color2) -> if color==color2 then [] else [aimsAt]
   where aimsAt = addPair (multPair n position) pos
 
---nextStates :: State -> [State]
+--nextStates :: GameState -> [GameState]
 --nextStates (pieceColor, board) = [(getOppositeColor pieceColor, board')|pos<-getColorPositions pieceColor board, board'<-genMoveBoards board pos]
 
 
-getNextStates :: State -> [State]
+getNextStates :: GameState -> [GameState]
 getNextStates (color,board) = []
 
 iterateUntilEnd :: (a -> a) -> a -> [a]
 iterateUntilEnd f a = a : iterateUntilEnd f (f a)
+
