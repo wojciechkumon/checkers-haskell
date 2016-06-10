@@ -122,3 +122,6 @@ iterateDirection n pos board color position | isPositionOutside aimsAt = []
 
 getNextStates :: State -> [State]
 getNextStates (color,board) = []
+
+iterateUntilEnd :: (a -> a) -> a -> [a]
+iterateUntilEnd f a = a : iterateUntilEnd f (f a)
