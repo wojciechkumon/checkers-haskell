@@ -5,8 +5,11 @@ import Utils
 -- PieceColor to decide whose turn it is
 type State = (PieceColor, Board)
 
--- (newPosition, listOfCapturedOpponetsPiecesPostions)
-type NextMove = (Position, [Position])
+-- (listOfnewPositions, listOfCapturedOpponetsPiecesPostions)
+type NextMove = ([Position], [Position])
+
+readNextMove :: String -> NextMove
+readNextMove str | length $ splitOn "-" str == 2) = 
 
 
 -- moves generator, generates all possible boards for position
@@ -26,10 +29,10 @@ deleteCaptures board (pos, (head:captures)) = deleteCaptures (deletePiece board 
 
 -- checks if move is possible for piece
 isMovePossible :: Board -> Position -> Position -> Bool
-isMovePossible board posFrom posTo = (filter (\(pos, _) -> pos == posTo) (genMoves board posFrom)) /= []
+isMovePossible board posFrom posTo = (filter (\([pos], _) -> pos == posTo) (genMoves board posFrom)) /= []
 
 getNextMove :: Board -> Position -> Position -> NextMove
-getNextMove board posFrom posTo = head (filter (\(pos, _) -> pos == posTo) (genMoves board posFrom))
+getNextMove board posFrom posTo = head (filter (\([pos], _) -> pos == posTo) (genMoves board posFrom))
 
 -- moves generator, generates all possible moves for position
 genMoves :: Board -> Position -> [NextMove]
@@ -54,8 +57,8 @@ isCapturePossible board pos color =
 
 getCaptures :: Board -> Position -> Piece -> [NextMove]
 getCaptures board pos (Piece pieceType pieceColor) =
-  filter (\(newPos, [_]) -> isFieldEmpty board newPos) 
-  (map (\capturedPosition -> (jumpOver pos capturedPosition, [capturedPosition])) 
+  filter (\([newPos], [_]) -> isFieldEmpty board newPos) 
+  (map (\capturedPosition -> ([jumpOver pos capturedPosition], [capturedPosition])) 
   (filter (\position -> isOppositePiece board pieceColor position) 
   (map (addPair pos) diagonal)))
 
@@ -65,7 +68,7 @@ addCaptures nextMoves = nextMoves
 
 toNextMoves :: [Position] -> [NextMove]
 toNextMoves [] = []
-toNextMoves positions = map (\pos -> (pos, [])) positions
+toNextMoves positions = map (\pos -> ([pos], [])) positions
 
 -- general possible moves for pieces
 getPossibleMoves :: PieceType -> [Position]
