@@ -32,3 +32,4 @@ fld3 = Nothing
 fld4 = Just (Piece Man Black)
 piece1 = (read "B") :: Piece
 -- example: putStr $ showBoard $ doNextMove testBoard $ head $ generatePossibleMoves testBoard (6,5)
+-- computer vs computer: putStrLn $ concatMap (("\n"++) . showBoard . snd) $ take 58 $ iterate doMinimaxMove (White, startingBoard)
