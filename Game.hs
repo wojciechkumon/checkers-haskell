@@ -1,11 +1,10 @@
 module Game where
 import Board
 import Utils
+import DataTypes
 
-type Move = Board -> Board
-type Game = [Move]
 
-playGame :: Game -> Board
+playGame :: [(Board -> Board)] -> Board
 playGame = applyAll startingBoard
 
 
@@ -24,7 +23,7 @@ boardAfterFirstMove = readBoard boardStringAfterFirstMove
 boardsAfterFirstMoveList :: [Board]
 boardsAfterFirstMoveList = [startingBoard, boardAfterFirstMove]
 
-testBoardString = "........\n..B...b.\n........\n..b...b.\n........\n....b.b.\n.....w..\n........"
+testBoardString = "........\n..B...b.\n........\n..b...b.\n........\n....b.b.\n...w.w..\n........"
 testBoard = readBoard testBoardString
 
 fld1 = Just (Piece King Black)

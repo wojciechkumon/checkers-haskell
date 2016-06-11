@@ -2,6 +2,7 @@ module Parser where
 import Board
 import Moves
 import Game
+import DataTypes
 import System.Environment
 import Control.Monad.Trans.State.Lazy
 import Text.ParserCombinators.Parsec

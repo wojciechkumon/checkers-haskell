@@ -1,12 +1,7 @@
 module Moves where
 import Board
 import Utils
-
-
--- PieceColor to decide whose turn it is
-type GameState = (PieceColor, Board)
-type NextMove = ([Position], [Position])
-data Move = Move (Position, Position) | Kill [Position] deriving Show
+import DataTypes
 
 
 -- generates board after move, move must be correct
@@ -77,9 +72,23 @@ generateNormalMoves board pos (Piece Man color) =
 generateNormalMoves board pos (Piece King color) = [] -- TODO
 
 
--- TODO wszystkie mozliwe ruchy dla gracza
---generatePossiblePlayerMoves :: Board -> PieceColor -> [Move]
---generatePossiblePlayerMoves board color = 
+-- wszystkie mozliwe ruchy dla gracza
+generatePossiblePlayerMoves :: Board -> PieceColor -> [Move]
+generatePossiblePlayerMoves board color = filterBestMoves $ foldl (++) [] $ map (generatePossibleMoves board) $ getColorPositions color board
+
+filterBestMoves :: [Move] -> [Move]
+filterBestMoves moves = if not (null (filterOnlyKills moves)) then removeNotLongestKillChains (filterOnlyKills moves) else moves
+
+filterOnlyKills :: [Move] -> [Move]
+filterOnlyKills moves = filter (isKill) moves
+                        where isKill (Kill _) = True
+                              isKill _ = False
+
+isCorrectMove  :: GameState -> Move -> Bool
+isCorrectMove (color, board) move = elem move $ generatePossiblePlayerMoves board color
+
+isEndOfGame :: GameState -> Bool
+isEndOfGame (color, board) = null $ generatePossiblePlayerMoves board color
 
 
 -- general possible moves for pieces
@@ -130,7 +139,7 @@ iterateDirection n pos board color position | isPositionOutside aimsAt = []
 
 
 getNextStates :: GameState -> [GameState]
-getNextStates (color,board) = []
+getNextStates (color,board) = map (\brd -> (getOppositeColor color, brd)) $ map (doNextMove board) $ generatePossiblePlayerMoves board color
 
 iterateUntilEnd :: (a -> a) -> a -> [a]
 iterateUntilEnd f a = a : iterateUntilEnd f (f a)

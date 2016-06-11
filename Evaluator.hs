@@ -1,6 +1,7 @@
 module Evaluator where
 import Board
 import Utils
+import DataTypes
 
 -- value > 0 means that white player has more points
 evaluateBoard :: Board -> Int

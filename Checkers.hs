@@ -1,3 +1,4 @@
+import DataTypes
 import Board
 import Moves
 import Utils

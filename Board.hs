@@ -2,23 +2,10 @@ module Board where
 import Utils
 import Data.Char
 import Data.Maybe
-
-data Piece = Piece {pieceType :: PieceType, pieceColor :: PieceColor} deriving Eq
-data PieceType = Man | King deriving Eq
-data PieceColor = White | Black deriving Eq
-
-type Field = Maybe Piece
-type Board = [[Field]]
-type Position = (Int, Int)
+import DataTypes
 
 
 -- PRINT --
-
-instance Show Piece where
-  show (Piece Man White) = "w"
-  show (Piece Man Black) = "b"
-  show (Piece King White) = "W"
-  show (Piece King Black) = "B"
 
 showField :: Field -> String
 showField Nothing = "."
@@ -69,9 +56,6 @@ getField board (a, b) = board!!a!!b
 emptyField :: Field
 emptyField = Nothing
 
-isEmptyField :: Board -> Position -> Bool
-isEmptyField board position = Nothing == getField board position
-
 updateBoard :: Board -> Field -> Position -> Board
 updateBoard = updateMatrix
 
@@ -91,7 +75,7 @@ isPositionInside :: Position -> Bool
 isPositionInside position = not (isPositionOutside position)
 
 getColorPositions :: PieceColor -> Board -> [Position]
-getColorPositions color board = [(a, b)|a<-[0..7],b<-[0..7], hasFieldColor color (getField board (a,b))]
+getColorPositions color board = [(a, b) | a <- [0..7], b <- [0..7], hasFieldColor color (getField board (a,b))]
 
 hasFieldColor :: PieceColor -> Field -> Bool
 hasFieldColor _ Nothing = False
