@@ -159,7 +159,7 @@ iterateDirection :: Int -> Position -> Board -> PieceColor -> Position -> [Posit
 iterateDirection n pos board color position | isPositionOutside aimsAt = []
                                             | otherwise = case getField board aimsAt of
                                                             Nothing -> aimsAt:iterateDirection (n+1) pos board color position
-                                                            Just (Piece _ color2) -> if color==color2 then [] else [aimsAt]
+                                                            Just _ -> []
   where aimsAt = addPair (multPair n position) pos
 
 --nextStates :: GameState -> [GameState]

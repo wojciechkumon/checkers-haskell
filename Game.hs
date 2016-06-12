@@ -29,6 +29,10 @@ testBoard = readBoard testBoardString
 testBoardString2 = "........\n..B.....\n........\n..b...b.\n...w....\n..B.b...\n...w.w..\n........"
 testBoard2 = readBoard testBoardString2
 
+testBoardString3 = ".b......\n..b.....\n........\n........\n........\n........\n.......B\n......W."
+testBoard3 = readBoard testBoardString3
+
+
 
 fld1 = Just (Piece King Black)
 fld2 = Just (Piece Man White)
