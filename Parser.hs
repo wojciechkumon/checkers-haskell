@@ -53,8 +53,6 @@ parseKill = do
 parsePDN =  try parseMove <|> parseKill
 
 
-type GameIO a = IO a
-
 play :: String -> GameIO ()
 play line = do
   case parse parsePDN "sPDN err" line of

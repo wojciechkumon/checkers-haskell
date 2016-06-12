@@ -15,8 +15,12 @@ type GameState = (PieceColor, Board)
 type NextMove = ([Position], [Position])
 data Move = Move (Position, Position) | Kill [Position] deriving (Show, Eq)
 
-data GameTree = GameTree {gameState :: GameState, gameTrees :: [GameTree]} deriving Show
 
+data GameTree = GameTree {gameState :: GameState, gameTrees :: [GameTree]} deriving Show
+data NewGameTree = NewGameTree {newGameState :: GameState, maybeMove :: (Maybe Move), newGameTrees :: [NewGameTree]} deriving Show
+
+
+type GameIO a = IO a
 
 instance Show Piece where
   show (Piece Man White) = "w"

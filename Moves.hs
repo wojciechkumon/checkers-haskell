@@ -18,11 +18,13 @@ switchToKingIfPossible (x,y) board | (x == 7) && (getField board (x,y) == (Just 
 -- deletes everything between positions
 deletePiecesOnLine :: Position -> Position -> Board -> Board
 deletePiecesOnLine (oldX,oldY) (newX,newY) board | ((oldX == newX) && (oldY == newY)) = board
-                                                 | otherwise = deletePiecesOnLine (getNextPositionOnLine (oldX,oldY) (newX,newY)) (newX,newY) (deletePiece board (getNextPositionOnLine (oldX,oldY) (newX,newY)))
+                                                 | otherwise = deletePiecesOnLine (getNextPositionBetween (oldX,oldY) (newX,newY)) (newX,newY) (deletePiece board (getNextPositionBetween (oldX,oldY) (newX,newY)))
 
-getNextPositionOnLine :: Position -> Position -> Position
-getNextPositionOnLine (oldX,oldY) (newX,newY) = (oldX+(oneIfGreaterElseMinusOne newX oldX),oldY+(oneIfGreaterElseMinusOne newY oldY))
+getNextPositionBetween :: Position -> Position -> Position
+getNextPositionBetween (oldX,oldY) (newX,newY) = (oldX+(oneIfGreaterElseMinusOne newX oldX),oldY+(oneIfGreaterElseMinusOne newY oldY))
 
+
+-- GENERATING POSSIBLE MOVES FOR POSITION
 
 generatePossibleMoves :: Board -> Position -> [Move]
 generatePossibleMoves board pos = generateMovesForField board pos (getField board pos)
@@ -42,7 +44,27 @@ generateCaptures board pos (Piece Man color) =
   filter (isFieldEmpty board) $ map (jumpOver pos) $ 
   filter (\position -> isOppositePiece board color position) $ 
   map (addPair pos) diagonal
-generateCaptures board pos (Piece King color) = [] -- TODO
+generateCaptures board pos (Piece King color) =
+  removeNotLongestKillChains $ addRecursiveKills board (Piece King color) $ 
+  map (\afterJumpPos -> Kill [pos, afterJumpPos]) $
+  mapToNextPositionsAfterKill board color $
+  filter (\(enemyPos, nextPosition) -> isFieldEmpty board nextPosition) $
+  map (\(position, enemyPos) -> (enemyPos, jumpOver position enemyPos)) $
+  filter (\(position, enemyPos) -> isOppositePiece board color enemyPos) $
+  (getSurroundingPositionPairs pos) ++
+  (map (\position -> (position, getNextPosition pos position)) $
+  generatePossiblePositions board pos (Piece King color))
+      where getSurroundingPositionPairs position = map (\diagonalPos -> (position,diagonalPos)) $ filter isPositionInside $ map (\diagonalPos -> addPair diagonalPos position) diagonal
+
+
+
+mapToNextPositionsAfterKill :: Board -> PieceColor -> [(Position, Position)] -> [Position]
+mapToNextPositionsAfterKill board color positions = foldl (++) [] $
+  map (\(enemyPos, newPos) -> iterateDirection 1 enemyPos board color (getDirection newPos enemyPos)) positions
+    where getDirection (newX, newY) (oldX, oldY) = (oneIfGreaterElseMinusOne newX oldX, oneIfGreaterElseMinusOne newY oldY)
+
+getNextPosition :: Position -> Position -> Position
+getNextPosition (baseX,baseY) (curX,curY) = (curX+(oneIfGreaterElseMinusOne curX baseX),curY+(oneIfGreaterElseMinusOne curY baseY))
 
 removeNotLongestKillChains :: [Move] -> [Move]
 removeNotLongestKillChains moves = filter (\(Kill killsList) -> length killsList == maxKillMoves moves) moves
@@ -51,8 +73,9 @@ maxKillMoves :: [Move] -> Int
 maxKillMoves killMoves = maximum $ map (\(Kill killsList) -> length killsList) killMoves
 
 addRecursiveKills :: Board -> Piece -> [Move] -> [Move]
-addRecursiveKills board (Piece Man color) moves = foldl (++) [] $ map (convertToNextKill board (Piece Man color)) moves
-addRecursiveKills board (Piece King color) moves = [] -- TODO
+addRecursiveKills board piece moves = foldl (++) [] $ map (convertToNextKill board piece) moves
+--addRecursiveKills board (Piece Man color) moves = foldl (++) [] $ map (convertToNextKill board (Piece Man color)) moves
+--addRecursiveKills board (Piece King color) moves = foldl (++) [] $ map (convertToNextKill board (Piece King color)) moves
 
 convertToNextKill :: Board -> Piece -> Move -> [Move]
 convertToNextKill oldBoard piece (Kill killMoves) = 
@@ -69,10 +92,13 @@ generateNormalMoves board pos (Piece Man color) =
   map (\position -> Move (pos, position)) $
   filter (\position -> isFieldEmpty board position) $ 
   map (\possibleMove -> addPair pos (multPair (getDirection color) possibleMove)) (getMovesDirections Man)
-generateNormalMoves board pos (Piece King color) = [] -- TODO
+generateNormalMoves board pos (Piece King color) = map (\newPos -> Move (pos,newPos)) $ generatePossiblePositions board pos (Piece King color)
+
+generatePossiblePositions :: Board -> Position -> Piece -> [Position]
+generatePossiblePositions  board pos (Piece King color) = concatMap (iterateDirection 1 pos board color) diagonal
 
 
--- wszystkie mozliwe ruchy dla gracza
+-- GENERATING ALL POSSIBLE MOVES FOR PLAYER
 generatePossiblePlayerMoves :: Board -> PieceColor -> [Move]
 generatePossiblePlayerMoves board color = filterBestMoves $ foldl (++) [] $ map (generatePossibleMoves board) $ getColorPositions color board
 
@@ -84,9 +110,11 @@ filterOnlyKills moves = filter (isKill) moves
                         where isKill (Kill _) = True
                               isKill _ = False
 
+-- checks if move is possible
 isCorrectMove  :: GameState -> Move -> Bool
 isCorrectMove (color, board) move = elem move $ generatePossiblePlayerMoves board color
 
+-- checks if it's end of the game
 isEndOfGame :: GameState -> Bool
 isEndOfGame (color, board) = null $ generatePossiblePlayerMoves board color
 
@@ -100,7 +128,7 @@ getMovesDirections King = diagonal
 diagonal :: [Position]
 diagonal = [(1,1),(-1,-1),(1,-1),(-1,1)]
 
--- diagonal moves for Man
+-- forward diagonal moves for Man
 forwardDiagonal :: [Position]
 forwardDiagonal = [(-1,1), (-1,-1)]
 
@@ -129,9 +157,9 @@ isOppositePiece board color pos = isPositionInside pos && hasFieldColor (getOppo
 -- position of the piece, the second the direction to iterate at
 iterateDirection :: Int -> Position -> Board -> PieceColor -> Position -> [Position]
 iterateDirection n pos board color position | isPositionOutside aimsAt = []
-                             | otherwise = case getField board aimsAt of
-                                             Nothing -> aimsAt:iterateDirection (n+1) pos board color position
-                                             Just (Piece _ color2) -> if color==color2 then [] else [aimsAt]
+                                            | otherwise = case getField board aimsAt of
+                                                            Nothing -> aimsAt:iterateDirection (n+1) pos board color position
+                                                            Just (Piece _ color2) -> if color==color2 then [] else [aimsAt]
   where aimsAt = addPair (multPair n position) pos
 
 --nextStates :: GameState -> [GameState]
@@ -140,6 +168,9 @@ iterateDirection n pos board color position | isPositionOutside aimsAt = []
 
 getNextStates :: GameState -> [GameState]
 getNextStates (color,board) = map (\brd -> (getOppositeColor color, brd)) $ map (doNextMove board) $ generatePossiblePlayerMoves board color
+
+getNextMoveStates :: GameState -> [(GameState, (Maybe Move))]
+getNextMoveStates (color,board) = map (\(brd,mv) -> ((getOppositeColor color, brd),(Just mv))) $ map (\mv -> (doNextMove board mv,mv)) $ generatePossiblePlayerMoves board color
 
 iterateUntilEnd :: (a -> a) -> a -> [a]
 iterateUntilEnd f a = a : iterateUntilEnd f (f a)

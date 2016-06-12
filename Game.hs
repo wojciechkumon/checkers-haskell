@@ -23,8 +23,12 @@ boardAfterFirstMove = readBoard boardStringAfterFirstMove
 boardsAfterFirstMoveList :: [Board]
 boardsAfterFirstMoveList = [startingBoard, boardAfterFirstMove]
 
-testBoardString = "........\n..B...b.\n........\n..b...b.\n........\n....b.b.\n...w.w..\n........"
+testBoardString = "........\n..B...B.\n........\n..b...b.\n...w....\n....b...\n...w.w..\n........"
 testBoard = readBoard testBoardString
+
+testBoardString2 = "........\n..B.....\n........\n..b...b.\n...w....\n..B.b...\n...w.w..\n........"
+testBoard2 = readBoard testBoardString2
+
 
 fld1 = Just (Piece King Black)
 fld2 = Just (Piece Man White)
