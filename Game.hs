@@ -18,8 +18,10 @@ startingBoardList = [startingBoard]
 
 boardStringAfterFirstMove :: String
 boardStringAfterFirstMove = ".b.b.b.b\nb.b.b.b.\n.b.b.b.b\n........\n...w....\nw...w.w.\n.w.w.w.w\nw.w.w.w."
+
 boardAfterFirstMove :: Board
 boardAfterFirstMove = readBoard boardStringAfterFirstMove
+
 boardsAfterFirstMoveList :: [Board]
 boardsAfterFirstMoveList = [startingBoard, boardAfterFirstMove]
 
@@ -41,3 +43,5 @@ fld4 = Just (Piece Man Black)
 piece1 = (read "B") :: Piece
 -- example: putStr $ showBoard $ doNextMove testBoard $ head $ generatePossibleMoves testBoard (6,5)
 -- computer vs computer: putStrLn $ concatMap (("\n"++) . showBoard . snd) $ take 58 $ iterate doMinimaxMove (White, startingBoard)
+
+
