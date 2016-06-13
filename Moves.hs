@@ -162,9 +162,6 @@ iterateDirection n pos board color position | isPositionOutside aimsAt = []
                                                             Just _ -> []
   where aimsAt = addPair (multPair n position) pos
 
---nextStates :: GameState -> [GameState]
---nextStates (pieceColor, board) = [(getOppositeColor pieceColor, board')|pos<-getColorPositions pieceColor board, board'<-genMoveBoards board pos]
-
 
 getNextStates :: GameState -> [GameState]
 getNextStates (color,board) = map (\brd -> (getOppositeColor color, brd)) $ map (doNextMove board) $ generatePossiblePlayerMoves board color
@@ -174,4 +171,3 @@ getNextMoveStates (color,board) = map (\(brd,mv) -> ((getOppositeColor color, br
 
 iterateUntilEnd :: (a -> a) -> a -> [a]
 iterateUntilEnd f a = a : iterateUntilEnd f (f a)
-

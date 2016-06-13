@@ -6,10 +6,6 @@ addPair (a,b) (c,d) = (a+c,b+d)
 multPair :: Int -> (Int,Int) -> (Int,Int)
 multPair n (a,b) = (n*a,n*b)
 
-applyAll :: a -> [a -> a] -> a
-applyAll a [] = a
-applyAll a (fun:xs) = applyAll (fun a) xs
-
 updateMatrix :: [[a]] -> a -> (Int, Int) -> [[a]]
 updateMatrix matrix element (i, j) = updateList matrix i (\row -> updateList row j (const element))
 

@@ -20,17 +20,6 @@ showBoardIndent x = ('\n':) . concatMap ((('\n':take x (repeat ' ')) ++ ) . conc
 
 -- READ --
 
--- format: "w" "W" "b" "B" for white, white king, black, black king
-instance Read Piece where
-  readsPrec _ value = 
-    tryParse [("w", (Piece Man White)), ("b", (Piece Man Black)), 
-      ("W", (Piece King White)), ("B", (Piece King Black))]
-    where tryParse [] = []
-          tryParse ((attempt, result):xs) = 
-            if (take (length attempt) value) == attempt then 
-              [(result, drop (length attempt) value)]
-            else tryParse xs
-
 -- format: Read Piece format or '.' for empty
 readField :: Char -> Field
 readField '.' = Nothing
@@ -40,7 +29,7 @@ readField inputChar = Just ((read [inputChar])::Piece)
 readBoard :: String -> Board
 readBoard inputString =  map (map readField) (lines inputString)
 
--- format: "a1" - "h8"
+-- format: "1" - "32"
 readPosition :: Int -> Position
 readPosition val = ((val - 1) `quot` 4, if (((val-1)`quot`4) `mod` 2 == 0) then 1+2*((val-1) `mod` 4) else 2*((val-1) `mod` 4))
 
@@ -53,14 +42,11 @@ getOppositeColor Black = White
 getField :: Board -> Position -> Field
 getField board (a, b) = board!!a!!b
 
-emptyField :: Field
-emptyField = Nothing
-
 updateBoard :: Board -> Field -> Position -> Board
 updateBoard = updateMatrix
 
 deletePiece :: Board -> Position -> Board
-deletePiece board position = updateBoard board emptyField position
+deletePiece board position = updateBoard board Nothing position
 
 movePiece :: Position -> Position -> Board -> Board
 movePiece pos1 pos2 board = updateBoard (deletePiece board pos1) (getField board pos1) pos2
