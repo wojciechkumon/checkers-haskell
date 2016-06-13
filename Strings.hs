@@ -1,16 +1,22 @@
 module Strings where
 
 wrongMoveString :: String
-wrongMoveString = "Wrong move, enter correct: "
+wrongMoveString = "Wrong move, enter correct:\n"
 
 whiteWinsString :: String
-whiteWinsString = "White wins!"
+whiteWinsString = "White wins!\n"
 
 blackWinsString :: String
-blackWinsString = "Black wins!"
+blackWinsString = "Black wins!\n"
 
-only1To32 :: String
-only1To32 = "Tylko liczby od 1-32"
+only1To32String :: String
+only1To32String = "Only numbers 1-32\n"
 
 startAndEndOfMinimum :: String
-startAndEndOfMinimum = "start i koniec minimum"
+startAndEndOfMinimum = "start and end of minimum\n"
+
+parseErrorString :: String
+parseErrorString = "parse error\n"
+
+errorString :: String
+errorString = "error\n"

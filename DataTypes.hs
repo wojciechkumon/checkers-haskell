@@ -21,12 +21,9 @@ type GameState = (PieceColor, Board)
 -- move with coords format
 data Move = Move (Position, Position) | Kill [Position] deriving (Show, Eq)
 
-
-data GameTree = GameTree {gameState :: GameState, gameTrees :: [GameTree]} deriving Show
-data NewGameTree = NewGameTree {newGameState :: GameState, maybeMove :: (Maybe Move), newGameTrees :: [NewGameTree]} deriving Show
+data GameTree = GameTree {gameState :: GameState, maybeMove :: (Maybe Move), gameForest :: [GameTree]} deriving Show
 
 
-type GameIO a = IO a
 
 instance Show Piece where
   show (Piece Man White) = "w"
@@ -44,3 +41,4 @@ instance Read Piece where
             if (take (length attempt) value) == attempt then 
               [(result, drop (length attempt) value)]
             else tryParse xs
+

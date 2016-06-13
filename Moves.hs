@@ -68,9 +68,7 @@ getNextPosition (baseX,baseY) (curX,curY) = (curX+(oneIfGreaterElseMinusOne curX
 
 removeNotLongestKillChains :: [Move] -> [Move]
 removeNotLongestKillChains moves = filter (\(Kill killsList) -> length killsList == maxKillMoves moves) moves
-
-maxKillMoves :: [Move] -> Int
-maxKillMoves killMoves = maximum $ map (\(Kill killsList) -> length killsList) killMoves
+  where maxKillMoves killMoves = maximum $ map (\(Kill killsList) -> length killsList) killMoves
 
 addRecursiveKills :: Board -> Piece -> [Move] -> [Move]
 addRecursiveKills board piece moves = foldl (++) [] $ map (convertToNextKill board piece) moves
@@ -156,18 +154,14 @@ isOppositePiece board color pos = isPositionInside pos && hasFieldColor (getOppo
 -- gets moving vectors for rooks, queens and bishops, the first paramater pos is the 
 -- position of the piece, the second the direction to iterate at
 iterateDirection :: Int -> Position -> Board -> PieceColor -> Position -> [Position]
-iterateDirection n pos board color position | isPositionOutside aimsAt = []
-                                            | otherwise = case getField board aimsAt of
-                                                            Nothing -> aimsAt:iterateDirection (n+1) pos board color position
+iterateDirection n pos board color position | isPositionOutside getNextPositionInIteration = []
+                                            | otherwise = case getField board getNextPositionInIteration of
+                                                            Nothing -> getNextPositionInIteration:iterateDirection (n+1) pos board color position
                                                             Just _ -> []
-  where aimsAt = addPair (multPair n position) pos
-
+  where getNextPositionInIteration = addPair (multPair n position) pos
 
 getNextStates :: GameState -> [GameState]
 getNextStates (color,board) = map (\brd -> (getOppositeColor color, brd)) $ map (doNextMove board) $ generatePossiblePlayerMoves board color
 
 getNextMoveStates :: GameState -> [(GameState, (Maybe Move))]
 getNextMoveStates (color,board) = map (\(brd,mv) -> ((getOppositeColor color, brd),(Just mv))) $ map (\mv -> (doNextMove board mv,mv)) $ generatePossiblePlayerMoves board color
-
-iterateUntilEnd :: (a -> a) -> a -> [a]
-iterateUntilEnd f a = a : iterateUntilEnd f (f a)

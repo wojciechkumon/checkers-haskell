@@ -1,7 +1,5 @@
 module Board where
 import Utils
-import Data.Char
-import Data.Maybe
 import DataTypes
 
 

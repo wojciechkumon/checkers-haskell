@@ -26,7 +26,7 @@ main = do
 -- function for recursive calls (one call == one move)
 handlePlay :: PieceColor -> (GameState, String) -> IO ()
 handlePlay playerColor ((color, board), info) = do
-  putStr info
+  putStr (info ++ showBoard board ++ "\n")
   if (isEndOfGame (color, board)) then
     if (color == White) then putStrLn blackWinsString else putStrLn whiteWinsString
   else
