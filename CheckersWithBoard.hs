@@ -17,7 +17,7 @@ main = do
   args <- getArgs
   appName <- getProgName
   putStrLn appName
-  mapM_ (\arg -> putStr (" " ++ arg)) args
+  mapM_ putStrLn args
   case (listToMaybe args) of
     Just "b" -> handlePlay Black (startingState, "")
     otherwise -> handlePlay White (startingState, "")

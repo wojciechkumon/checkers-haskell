@@ -22,6 +22,7 @@ Wprowadzanie danych:
 26x17x10 <- wielokrotne bicie: każda liczba to kolejna pozycja po skoku pionka/damki
 
 Wprowadzenie ruchu w złym formacie lub ruchu niemożliwego do wykonania w danej chwili zgodnie z zasadami spowoduje wypisanie komunikatu i możliwe jest ponowne wpisanie ruchu (program się nie wysypuje).
+Damka po przeskoczeniu zbijanego przeciwnika może wylądować w dowolnym miejscu za nim (w linii), nie musi bezpośrednio za nim.
 
 Schemat planszy:
 
