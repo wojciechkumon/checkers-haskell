@@ -1,6 +1,7 @@
 module Minimax where
 import Evaluator
 import Moves
+import Board
 import DataTypes
 
 
@@ -16,7 +17,7 @@ generateGameTree i state = genGameTree i (state,Nothing)
 genGameTree :: Int -> (GameState, (Maybe Move)) -> GameTree
 genGameTree 0 (state, maybeMove) = GameTree state maybeMove []
 genGameTree depth (state, maybeMove) | isLastState state = GameTree state maybeMove []
-                                        | otherwise = GameTree state maybeMove $ map (genGameTree (depth-1)) $ getNextMoveStates state
+                                     | otherwise = GameTree state maybeMove $ map (genGameTree (depth-1)) $ getNextMoveStates state
 
 calculateMinimax :: GameTree -> Int
 calculateMinimax (GameTree state _ []) = evaluateState state
@@ -61,4 +62,4 @@ getBestChoice color comparator ((int,state):tail) | isWinningState color state =
                                                                      if comparator int int2 then (int,state) else (int2,state2)
 
 isWinningState :: PieceColor -> GameState -> Bool
-isWinningState color (_,board) = isEndOfGame (color, board)
+isWinningState playerColor (_,board) = isEndOfGame (getOppositeColor playerColor, board)
