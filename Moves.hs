@@ -37,6 +37,7 @@ generateMovesForField board pos (Just (Piece pieceType color)) =
   else generateNormalMoves board pos (Piece pieceType color)
 
 
+-- recursively generates possible kills for position 
 generateCaptures :: Board -> Position -> Piece -> [Move]
 generateCaptures board pos (Piece Man color) = 
   removeNotLongestKillChains $ addRecursiveKills board (Piece Man color) $ 

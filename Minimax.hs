@@ -7,6 +7,8 @@ import DataTypes
 
 -- module to calculate current best move based on minimax algorithm
 
+data GameTree = GameTree {gameState :: GameState, maybeMove :: (Maybe Move), gameForest :: [GameTree]} deriving Show
+
 maxTreeDepth :: Int
 maxTreeDepth = 5
 

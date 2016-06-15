@@ -21,9 +21,6 @@ type GameState = (PieceColor, Board)
 -- move with coords format
 data Move = Move (Position, Position) | Kill [Position] deriving (Show, Eq)
 
-data GameTree = GameTree {gameState :: GameState, maybeMove :: (Maybe Move), gameForest :: [GameTree]} deriving Show
-
-
 
 instance Show Piece where
   show (Piece Man White) = "w"

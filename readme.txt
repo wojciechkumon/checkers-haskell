@@ -22,6 +22,7 @@ Wprowadzanie danych:
 26x17x10 <- wielokrotne bicie: każda liczba to kolejna pozycja po skoku pionka/damki
 
 Wprowadzenie ruchu w złym formacie lub ruchu niemożliwego do wykonania w danej chwili zgodnie z zasadami spowoduje wypisanie komunikatu i możliwe jest ponowne wpisanie ruchu (program się nie wysypuje).
+Na starcie białe zajmują dolną część planszy (3 dolne wiersze), a czarne górną (3 górne wiersze).
 Damka po przeskoczeniu zbijanego przeciwnika może wylądować w dowolnym miejscu za nim (w linii), nie musi bezpośrednio za nim.
 
 Schemat planszy:
@@ -40,3 +41,5 @@ Program spełnia zasady gry w warcaby, np. nie pozwala na wykonanie nienajdłuż
 - pionek = 5 punktów + indeks (od zera) rzędu jak daleko znajduje się swojego końca planszy co daje zakres 5-12, bo będąc na końcu (indeks 7) natępuje zmiana w damkę czyli na 25 punktów
 
 Wewnętrznie plansza to zbiór pól, wykorzystywana jest lista list (indeksy 0-7), więc dane wejściowe typu MovePDN (10,14) zostają skonwertowane do Move ((2,3), (3,2)).
+
+W projekcie skorzystałem z parsera dostarczonego wraz z opisem zadania.
