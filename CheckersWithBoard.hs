@@ -10,6 +10,8 @@ import System.Environment
 import Data.Maybe
 import Text.ParserCombinators.Parsec
 
+-- main which prints moves and board after every move
+
 -- accepts 1 or 0 arguments
 -- if this argument == "b" then you start as black, else you start as white
 main :: IO ()

@@ -1,9 +1,11 @@
 module Minimax where
-import Evaluator
+import BoardEvaluator
 import Moves
 import Board
 import DataTypes
 
+
+-- module to calculate current best move based on minimax algorithm
 
 maxTreeDepth :: Int
 maxTreeDepth = 5
@@ -12,7 +14,7 @@ getMaybeMove :: GameTree -> (Maybe Move)
 getMaybeMove (GameTree _ maybeMove _) = maybeMove
 
 generateGameTree :: Int -> GameState -> GameTree
-generateGameTree i state = genGameTree i (state,Nothing)
+generateGameTree depth state = genGameTree depth (state,Nothing)
 
 genGameTree :: Int -> (GameState, (Maybe Move)) -> GameTree
 genGameTree 0 (state, maybeMove) = GameTree state maybeMove []
@@ -20,7 +22,7 @@ genGameTree depth (state, maybeMove) | isLastState state = GameTree state maybeM
                                      | otherwise = GameTree state maybeMove $ map (genGameTree (depth-1)) $ getNextMoveStates state
 
 calculateMinimax :: GameTree -> Int
-calculateMinimax (GameTree state _ []) = evaluateState state
+calculateMinimax (GameTree state _ []) = evaluateBoard $ snd state
 calculateMinimax (GameTree (White,_) _ children) = maximum (map calculateMinimax children)
 calculateMinimax (GameTree (Black,_) _ children) = minimum (map calculateMinimax children)
 
@@ -46,9 +48,6 @@ getBestMove _ _ [val] = val
 getBestMove color comparator ((int,state,maybeMove):tail) | isWinningState color state = (int,state,maybeMove)
                                                           | otherwise = let (int2,state2,maybeMove2) = getBestMove color comparator tail in
                                                                      if comparator int int2 then (int,state,maybeMove) else (int2,state2,maybeMove2)
-
-evaluateState :: GameState -> Int
-evaluateState = evaluateBoard . snd
 
 -- checks end of the game, TODO check if all blocked
 isLastState :: GameState -> Bool

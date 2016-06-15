@@ -4,6 +4,8 @@ import Moves
 import StartingStructures
 import Minimax
 
+-- main which allows watching game between two computers
+
 main :: IO ()
 main = runCpuVsCpu
 

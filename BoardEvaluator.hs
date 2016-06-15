@@ -1,7 +1,9 @@
-module Evaluator where
+module BoardEvaluator where
 import Board
 import Utils
 import DataTypes
+
+-- module which allows to change board state into points
 
 -- value > 0 means that white player has more points
 evaluateBoard :: Board -> Int
